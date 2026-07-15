@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiteSized Bistro - Kitchen Station</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #1e272e;
+            color: #ffffff;
+        }
+        .card {
+            background: #2f3542;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        .low-stock-alert {
+            background-color: #ff4757;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+        .stock-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #3e4450;
+        }
+        .stock-row:last-child { border-bottom: none; }
+        .restock-form {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .restock-form input {
+            width: 80px;
+            padding: 6px;
+            border: none;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .action-btn {
+            background-color: #2ed573;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .order-card {
+            background: #3e4450;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            border-bottom: 1px solid #57606f;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        .served { opacity: 0.4; }
+        .badge { background: #ffa502; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        .badge.served-badge { background: #2ed573; }
+        .serve-btn { background-color: #1e90ff; color: white; border: none; padding: 10px; border-radius: 4px; margin-top: 10px; width: 100%; font-weight: bold; cursor: pointer;}
+        .reset-btn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="margin: 0;">👨‍🍳 Kitchen Console</h2>
+        <button class="reset-btn" onclick="resetSequence()">Reset Order Num to 1 🔄</button>
+    </div>
+
+    <div id="alert-box"></div>
+
+    <div class="card">
+        <h3 style="margin-top:0; color:#2ed573;">Inventory Control</h3>
+        <div id="stock-container">Syncing inventory...</div>
+    </div>
+
+    <div class="card">
+        <h3>Incoming Orders</h3>
+        <div id="orders-container">No orders yet.</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            databaseURL: "https://bitesizedbistro-default-rtdb.firebaseio.com/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let currentMenu = [];
+        let rawOrders = {};
+
+        // --- Live Sync Menu ---
+        onValue(ref(db, 'menu'), (snapshot) => {
+            currentMenu = snapshot.val() || [];
+            renderKitchenInventory();
+        });
+
+        // --- Live Sync All Orders ---
+        onValue(ref(db, 'orders'), (snapshot) => {
+            rawOrders = snapshot.val() || {};
+            renderKitchenOrders();
+        });
+
+        function renderKitchenInventory() {
+            const stockContainer = document.getElementById('stock-container');
+            const alertBox = document.getElementById('alert-box');
+            stockContainer.innerHTML = '';
+            alertBox.innerHTML = '';
+
+            currentMenu.forEach(item => {
+                const isLowStock = item.stock < 10;
+                
+                if (isLowStock) {
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'low-stock-alert';
+                    alertDiv.innerHTML = `⚠️ Low Stock Warning: ${item.name} is down to ${item.stock}!`;
+                    alertBox.appendChild(alertDiv);
+                }
+
+                const row = document.createElement('div');
+                row.className = 'stock-row';
+                row.innerHTML = `
+                    <div>
+                        <strong>${item.name}</strong> (Stock: ${item.stock})
+                    </div>
+                    <div class="restock-form">
+                        <input type="number" id="restock-qty-${item.id}" placeholder="+ Amount">
+                        <button class="action-btn" onclick="restockItem(${item.id})">Restock</button>
+                    </div>
+                `;
+                stockContainer.appendChild(row);
+            });
+        }
+
+        window.restockItem = function(itemId) {
+            const input = document.getElementById(`restock-qty-${itemId}`);
+            const addValue = parseInt(input.value);
+            if (isNaN(addValue) || addValue <= 0) return alert("Enter valid quantity");
+
+            const itemIndex = currentMenu.findIndex(i => i.id === itemId);
+            if (itemIndex !== -1) {
+                const updatedStock = currentMenu[itemIndex].stock + addValue;
+                set(ref(db, `menu/${itemIndex}/stock`), updatedStock);
+                input.value = '';
+            }
+        };
+
+        function renderKitchenOrders() {
+            const ordersContainer = document.getElementById('orders-container');
+            ordersContainer.innerHTML = '';
+
+            const orderEntries = Object.entries(rawOrders);
+            if (orderEntries.length === 0) {
+                ordersContainer.innerHTML = '<p style="color:#a4b0be; margin:0;">No orders received yet.</p>';
+                return;
+            }
+
+            // Sort orders so newest are at the top
+            orderEntries.sort((a, b) => b[1].timestamp - a[1].timestamp);
+
+            orderEntries.forEach(([key, order]) => {
+                const isServed = order.status === 'Served';
+                const div = document.createElement('div');
+                div.className = `order-card ${isServed ? 'served' : ''}`;
+
+                let itemsHtml = '';
+                order.items.forEach(item => {
+                    itemsHtml += `<li>${item.name} x ${item.qty}</li>`;
+                });
+
+                div.innerHTML = `
+                    <div class="order-header">
+                        <span>Order #${order.orderId} (${order.customer})</span>
+                        <span class="badge ${isServed ? 'served-badge' : ''}">${order.status}</span>
+                    </div>
+                    <ul style="margin: 5px 0; padding-left: 15px;">${itemsHtml}</ul>
+                    ${!isServed ? `<button class="serve-btn" onclick="serveOrder('${key}')">Mark Served ✓</button>` : ''}
+                `;
+                ordersContainer.appendChild(div);
+            });
+        }
+
+        window.serveOrder = function(orderKey) {
+            update(ref(db, `orders/${orderKey}`), { status: 'Served' });
+        };
+
+        // Resets current count and removes existing order history
+        window.resetSequence = function() {
+            if (confirm("This will clear active orders and reset order numbers to 1. Are you sure?")) {
+                set(ref(db, 'orderSequence'), 0);
+                set(ref(db, 'orders'), null);
+            }
+        };
+    </script>
+</body>
+</html>
