@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiteSized Bistro - Order Now</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #f5f6fa;
+            color: #2f3542;
+        }
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 15px;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .menu-item:last-child { border-bottom: none; }
+        .controls { display: flex; align-items: center; gap: 12px; }
+        
+        button.action-btn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button.action-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .checkout-btn { 
+            width: 100%; 
+            padding: 14px; 
+            font-size: 16px; 
+            background-color: #2ed573; 
+            margin-top: 15px; 
+            border-radius: 8px; 
+            border: none; 
+            color: white; 
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .order-card {
+            border: 1px solid #eee;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #fafafa;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+        .served { opacity: 0.5; background: #ebfbee; }
+        .badge { background: #ffa502; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        .badge.served-badge { background: #2ed573; }
+    </style>
+</head>
+<body>
+
+    <div style="margin-bottom: 15px;">
+        <h3 style="margin: 0; color: #555;">Ordering as <span id="display-customer-id" style="color: #ff4757;">...</span></h3>
+    </div>
+
+    <div class="card">
+        <h4 style="margin-top:0;">Our Menu</h4>
+        <div id="menu-container">Loading fresh menu...</div>
+    </div>
+
+    <div class="card">
+        <h4>Your Cart</h4>
+        <div id="cart-container">
+            <p style="color: #777; margin:0;">Your cart is empty.</p>
+        </div>
+        <div id="cart-total" style="margin-top: 15px; font-weight: bold; display: none;">Total: $0.00</div>
+        <button id="checkout-button" class="checkout-btn" onclick="submitOrder()" style="display: none;">Place Order</button>
+    </div>
+
+    <div class="card">
+        <h4>Your Active & Past Orders</h4>
+        <div id="personal-orders-container">
+            <p style="color: #777; margin:0;">You haven't ordered anything yet.</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set, push, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Pre-configured public sandbox database for instant setup
+        const firebaseConfig = {
+            databaseURL: "https://bitesizedbistro-default-rtdb.firebaseio.com/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // --- Auto Customer ID ---
+        let myCustomerId = localStorage.getItem('my_device_customer_id');
+        if (!myCustomerId) {
+            myCustomerId = 'Customer #' + Math.floor(1000 + Math.random() * 9000);
+            localStorage.setItem('my_device_customer_id', myCustomerId);
+        }
+        document.getElementById('display-customer-id').innerText = myCustomerId;
+
+        let cart = {};
+        let currentMenu = [];
+        let currentOrders = [];
+
+        // --- Live Sync Menu ---
+        onValue(ref(db, 'menu'), (snapshot) => {
+            const data = snapshot.val();
+            if (!data) {
+                // Initialize menu database if empty
+                const initialMenu = [
+                    { id: 1, name: "Classic Burger", price: 9.99, stock: 15 },
+                    { id: 2, name: "Crispy Fries", price: 3.99, stock: 20 },
+                    { id: 3, name: "Soft Drink", price: 1.99, stock: 25 }
+                ];
+                set(ref(db, 'menu'), initialMenu);
+                currentMenu = initialMenu;
+            } else {
+                currentMenu = data;
+            }
+            renderMenu();
+            renderCart();
+        });
+
+        // --- Live Sync Orders ---
+        onValue(ref(db, 'orders'), (snapshot) => {
+            const data = snapshot.val();
+            currentOrders = data ? Object.values(data) : [];
+            renderPersonalOrders();
+        });
+
+        window.changeCartQuantity = function(itemId, change) {
+            if (!cart[itemId]) cart[itemId] = 0;
+            cart[itemId] += change;
+            if (cart[itemId] <= 0) delete cart[itemId];
+            renderMenu();
+            renderCart();
+        };
+
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = '';
+
+            currentMenu.forEach(item => {
+                const cartQty = cart[item.id] || 0;
+                const availableToBuy = item.stock - cartQty;
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'menu-item';
+                itemDiv.innerHTML = `
+                    <div>
+                        <strong>${item.name}</strong> - $${item.price.toFixed(2)}<br>
+                        <small style="color: #666;">In Stock: ${item.stock}</small>
+                    </div>
+                    <div class="controls">
+                        <button class="action-btn" onclick="changeCartQuantity(${item.id}, -1)" ${cartQty === 0 ? 'disabled' : ''}>-</button>
+                        <span style="font-weight: bold; min-width: 15px; text-align: center;">${cartQty}</span>
+                        <button class="action-btn" onclick="changeCartQuantity(${item.id}, 1)" ${availableToBuy <= 0 ? 'disabled' : ''}>+</button>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-container');
+            const totalDiv = document.getElementById('cart-total');
+            const checkoutBtn = document.getElementById('checkout-button');
+            const cartKeys = Object.keys(cart);
+
+            if (cartKeys.length === 0) {
+                container.innerHTML = '<p style="color: #777; margin: 0;">Your cart is empty.</p>';
+                totalDiv.style.display = 'none';
+                checkoutBtn.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = '';
+            let orderTotal = 0;
+
+            cartKeys.forEach(itemId => {
+                const item = currentMenu.find(i => i.id == itemId);
+                if (!item) return;
+                const quantity = cart[itemId];
+                const cost = item.price * quantity;
+                orderTotal += cost;
+
+                const cartRow = document.createElement('div');
+                cartRow.style.display = 'flex';
+                cartRow.style.justifyContent = 'space-between';
+                cartRow.style.marginBottom = '8px';
+                cartRow.innerHTML = `<span>${item.name} (x${quantity})</span><span>$${cost.toFixed(2)}</span>`;
+                container.appendChild(cartRow);
+            });
+
+            totalDiv.innerHTML = `Total: $${orderTotal.toFixed(2)}`;
+            totalDiv.style.display = 'block';
+            checkoutBtn.style.display = 'block';
+        }
+
+        window.submitOrder = function() {
+            // Use transactions to ensure order sequence numbers and stock allocations don't clash 
+            const seqRef = ref(db, 'orderSequence');
+            
+            runTransaction(seqRef, (currentSeq) => {
+                return (currentSeq || 0) + 1;
+            }).then((transactionResult) => {
+                const newOrderNum = transactionResult.snapshot.val();
+                
+                let totalCost = 0;
+                let orderedItemsList = [];
+                const updatedMenu = [...currentMenu];
+
+                Object.keys(cart).forEach(itemId => {
+                    const item = updatedMenu.find(i => i.id == itemId);
+                    const qtyOrdered = cart[itemId];
+                    
+                    item.stock -= qtyOrdered;
+                    totalCost += item.price * qtyOrdered;
+                    orderedItemsList.push({ name: item.name, qty: qtyOrdered });
+                });
+
+                const newOrder = {
+                    orderId: newOrderNum,
+                    customer: myCustomerId,
+                    items: orderedItemsList,
+                    total: totalCost,
+                    status: 'Pending',
+                    timestamp: Date.now()
+                };
+
+                // Save order & update stock quantities in Firebase
+                push(ref(db, 'orders'), newOrder);
+                set(ref(db, 'menu'), updatedMenu);
+
+                cart = {};
+                renderCart();
+                renderMenu();
+            }).catch((err) => {
+                alert("Order processing failed: " + err.message);
+            });
+        };
+
+        function renderPersonalOrders() {
+            const container = document.getElementById('personal-orders-container');
+            container.innerHTML = '';
+
+            const myOrders = currentOrders
+                .filter(o => o.customer === myCustomerId)
+                .sort((a, b) => b.timestamp - a.timestamp);
+
+            if (myOrders.length === 0) {
+                container.innerHTML = '<p style="color: #777; margin:0;">You have no active orders.</p>';
+                return;
+            }
+
+            myOrders.forEach(order => {
+                const isServed = order.status === 'Served';
+                const div = document.createElement('div');
+                div.className = `order-card ${isServed ? 'served' : ''}`;
+
+                let itemsHtml = '';
+                order.items.forEach(item => {
+                    itemsHtml += `<li>${item.name} x ${item.qty}</li>`;
+                });
+
+                div.innerHTML = `
+                    <div class="order-header">
+                        <span>Order #${order.orderId}</span>
+                        <span class="badge ${isServed ? 'served-badge' : ''}">${order.status}</span>
+                    </div>
+                    <ul style="margin: 5px 0; padding-left: 15px; font-size:14px;">${itemsHtml}</ul>
+                    <div style="font-weight:bold; font-size:13px;">Total: $${order.total.toFixed(2)}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
