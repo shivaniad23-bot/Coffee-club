@@ -1,203 +1,102 @@
-<!DOCTYPE html>
+                <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Club - Order Online</title>
+    <title>Coffee Club - Kitchen Dashboard</title>
     <style>
         :root {
             --primary: #5c3d2e;
-            --secondary: #e8ded2;
             --dark: #2d1b11;
-            --light: #fdfaf6;
+            --light: #f4ece1;
+            --green: #2e7d32;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: var(--light);
-            color: var(--dark);
             margin: 0;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         header {
-            text-align: center;
-            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
         header h1 {
-            color: var(--primary);
-            margin: 5px 0;
-        }
-        .menu-container {
-            width: 100%;
-            max-width: 450px;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .menu-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #f0e6df;
-        }
-        .menu-item:last-child {
-            border-bottom: none;
-        }
-        .item-details h3 {
-            margin: 0 0 5px 0;
-            font-size: 1.1rem;
-        }
-        .item-details p {
             margin: 0;
             color: var(--primary);
-            font-weight: bold;
         }
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
         }
-        .btn-qty {
-            background-color: var(--secondary);
-            border: none;
-            color: var(--dark);
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
-        .btn-qty:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-        .qty-display {
-            font-size: 1.1rem;
-            font-weight: bold;
-            min-width: 15px;
-            text-align: center;
-        }
-        .table-input-section {
-            margin-top: 20px;
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            justify-content: space-between;
+            border-top: 6px solid var(--primary);
         }
-        .table-input-section label {
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .table-input-section input {
-            padding: 10px;
-            border: 1px solid var(--secondary);
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-        }
-        .order-summary {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 2px dashed var(--secondary);
+        .order-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            font-size: 1.2rem;
             font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
         }
-        .btn-submit {
-            display: block;
-            width: 100%;
-            background-color: var(--primary);
+        .items-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+            flex-grow: 1;
+        }
+        .items-list li {
+            padding: 5px 0;
+            font-size: 1.05rem;
+        }
+        .items-list li span {
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .btn-complete {
+            background-color: var(--green);
             color: white;
             border: none;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1.1rem;
+            padding: 10px;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 20px;
-            transition: 0.2s;
-        }
-        .btn-submit:hover {
-            background-color: var(--dark);
+            width: 100%;
+            font-size: 1rem;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>☕ Coffee Club</h1>
-        <p>Scan. Order. Enjoy.</p>
+        <h1>🍳 Kitchen Order Board</h1>
+        <span style="font-weight: bold;">LIVE</span>
     </header>
 
-    <div class="menu-container">
-        <!-- Menu Items -->
-        <div class="menu-item" data-id="espresso" data-name="Espresso" data-price="120">
-            <div class="item-details">
-                <h3>Espresso</h3>
-                <p>₹120</p>
-            </div>
-            <div class="quantity-controls">
-                <button class="btn-qty decrement">-</button>
-                <span class="qty-display">0</span>
-                <button class="btn-qty increment">+</button>
-            </div>
-        </div>
-
-        <div class="menu-item" data-id="cappuccino" data-name="Cappuccino" data-price="180">
-            <div class="item-details">
-                <h3>Cappuccino</h3>
-                <p>₹180</p>
-            </div>
-            <div class="quantity-controls">
-                <button class="btn-qty decrement">-</button>
-                <span class="qty-display">0</span>
-                <button class="btn-qty increment">+</button>
-            </div>
-        </div>
-
-        <div class="menu-item" data-id="croissant" data-name="Butter Croissant" data-price="150">
-            <div class="item-details">
-                <h3>Butter Croissant</h3>
-                <p>₹150</p>
-            </div>
-            <div class="quantity-controls">
-                <button class="btn-qty decrement">-</button>
-                <span class="qty-display">0</span>
-                <button class="btn-qty increment">+</button>
-            </div>
-        </div>
-
-        <!-- Table Info input -->
-        <div class="table-input-section">
-            <label for="table-num">Your Table Number:</label>
-            <input type="number" id="table-num" placeholder="e.g. 5" min="1">
-        </div>
-
-        <!-- Price summary -->
-        <div class="order-summary">
-            <span>Total Amount:</span>
-            <span id="total-price">₹0</span>
-        </div>
-
-        <button class="btn-submit" id="btn-order">Send Order to Kitchen</button>
+    <div class="orders-grid" id="orders-container">
+        <!-- Live Orders Will Appear Here Dynamically -->
     </div>
 
     <!-- Firebase Connection Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // IMPORTANT: Replace this placeholder config with your actual Firebase project settings
+        // IMPORTANT: Use the exact same Firebase config as your customer index.html page
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -211,89 +110,53 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Keep track of counts and calculate live price
-        const menuItems = document.querySelectorAll('.menu-item');
-        const totalPriceDisplay = document.getElementById('total-price');
+        const ordersContainer = document.getElementById('orders-container');
 
-        menuItems.forEach(item => {
-            const incrementBtn = item.querySelector('.increment');
-            const decrementBtn = item.querySelector('.decrement');
-            const qtyDisplay = item.querySelector('.qty-display');
+        // Listen for new orders and render them
+        onValue(ref(db, 'orders'), (snapshot) => {
+            ordersContainer.innerHTML = '';
+            const data = snapshot.val();
 
-            incrementBtn.addEventListener('click', () => {
-                let qty = parseInt(qtyDisplay.textContent);
-                qtyDisplay.textContent = qty + 1;
-                updateTotal();
-            });
-
-            decrementBtn.addEventListener('click', () => {
-                let qty = parseInt(qtyDisplay.textContent);
-                if (qty > 0) {
-                    qtyDisplay.textContent = qty - 1;
-                    updateTotal();
-                }
-            });
-        });
-
-        function updateTotal() {
-            let grandTotal = 0;
-            menuItems.forEach(item => {
-                const qty = parseInt(item.querySelector('.qty-display').textContent);
-                const price = parseFloat(item.getAttribute('data-price'));
-                grandTotal += qty * price;
-            });
-            totalPriceDisplay.textContent = '₹' + grandTotal;
-        }
-
-        // Submitting order to the kitchen page
-        document.getElementById('btn-order').addEventListener('click', () => {
-            const tableNumber = document.getElementById('table-num').value;
-            if (!tableNumber) {
-                alert('Please enter your table number first!');
+            if (!data) {
+                ordersContainer.innerHTML = '<p style="font-size: 1.2rem; color: #666;">No pending orders. Good job!</p>';
                 return;
             }
 
-            let orderedItems = [];
-            let total = 0;
+            Object.keys(data).forEach(key => {
+                const order = data[key];
+                
+                const card = document.createElement('div');
+                card.className = 'order-card';
 
-            menuItems.forEach(item => {
-                const qty = parseInt(item.querySelector('.qty-display').textContent);
-                if (qty > 0) {
-                    const name = item.getAttribute('data-name');
-                    const price = parseFloat(item.getAttribute('data-price'));
-                    orderedItems.push({ item: name, quantity: qty });
-                    total += qty * price;
-                }
-            });
-
-            if (orderedItems.length === 0) {
-                alert('Please select at least one item before sending!');
-                return;
-            }
-
-            const orderData = {
-                table: tableNumber,
-                items: orderedItems,
-                total: total,
-                status: "Pending",
-                timestamp: Date.now()
-            };
-
-            // Push order straight to your kitchen board inside Firebase
-            push(ref(db, 'orders'), orderData)
-                .then(() => {
-                    alert('Order sent! The kitchen will begin preparing your coffee shortly.');
-                    // Reset quantities
-                    document.querySelectorAll('.qty-display').forEach(disp => disp.textContent = '0');
-                    document.getElementById('table-num').value = '';
-                    updateTotal();
-                })
-                .catch((error) => {
-                    console.error("Order failed:", error);
-                    alert("Error sending order. Did you paste your real Firebase keys in yet?");
+                let itemsHTML = '';
+                order.items.forEach(i => {
+                    itemsHTML += `<li><span>${i.quantity}x</span> ${i.item}</li>`;
                 });
+
+                card.innerHTML = `
+                    <div>
+                        <div class="order-header">
+                            <span>Order #${order.orderNum || 'N/A'}</span>
+                            <span>Table: ${order.table}</span>
+                        </div>
+                        <ul class="items-list">
+                            ${itemsHTML}
+                        </ul>
+                    </div>
+                    <button class="btn-complete" data-key="${key}">Done / Serve</button>
+                `;
+
+                ordersContainer.appendChild(card);
+            });
+
+            // Set up button click event to delete completed orders from board
+            document.querySelectorAll('.btn-complete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const orderKey = e.target.getAttribute('data-key');
+                    remove(ref(db, `orders/${orderKey}`));
+                });
+            });
         });
     </script>
 </body>
 </html>
-
