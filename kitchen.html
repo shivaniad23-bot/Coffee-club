@@ -3,224 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiteSized Bistro - Kitchen Station</title>
+    <title>Coffee Club - Order Online</title>
     <style>
-        * { box-sizing: border-box; }
+        :root {
+            --primary: #5c3d2e;
+            --secondary: #e8ded2;
+            --dark: #2d1b11;
+            --light: #fdfaf6;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
             margin: 0;
-            padding: 15px;
-            background-color: #1e272e;
-            color: #ffffff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .card {
-            background: #2f3542;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
+        header {
+            text-align: center;
+            margin-bottom: 30px;
         }
-        .low-stock-alert {
-            background-color: #ff4757;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            font-weight: bold;
+        header h1 {
+            color: var(--primary);
+            margin: 5px 0;
         }
-        .stock-row {
+        .menu-container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .menu-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #3e4450;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0e6df;
         }
-        .stock-row:last-child { border-bottom: none; }
-        .restock-form {
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .item-details h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+        .item-details p {
+            margin: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .quantity-controls {
             display: flex;
-            gap: 5px;
-            margin-top: 5px;
+            align-items: center;
+            gap: 12px;
         }
-        .restock-form input {
-            width: 80px;
-            padding: 6px;
+        .btn-qty {
+            background-color: var(--secondary);
             border: none;
-            border-radius: 4px;
+            color: var(--dark);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .btn-qty:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        .qty-display {
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-width: 15px;
             text-align: center;
         }
-        .action-btn {
-            background-color: #2ed573;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+        .table-input-section {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .table-input-section label {
             font-weight: bold;
-            cursor: pointer;
+            font-size: 0.9rem;
         }
-        .order-card {
-            background: #3e4450;
-            padding: 15px;
+        .table-input-section input {
+            padding: 10px;
+            border: 1px solid var(--secondary);
             border-radius: 8px;
-            margin-bottom: 15px;
+            font-size: 1rem;
+            outline: none;
         }
-        .order-header {
+        .order-summary {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed var(--secondary);
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
             font-weight: bold;
-            border-bottom: 1px solid #57606f;
-            padding-bottom: 8px;
-            margin-bottom: 8px;
         }
-        .served { opacity: 0.4; }
-        .badge { background: #ffa502; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
-        .badge.served-badge { background: #2ed573; }
-        .serve-btn { background-color: #1e90ff; color: white; border: none; padding: 10px; border-radius: 4px; margin-top: 10px; width: 100%; font-weight: bold; cursor: pointer;}
-        .reset-btn {
-            background-color: #ff4757;
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            margin-bottom: 15px;
+            margin-top: 20px;
+            transition: 0.2s;
+        }
+        .btn-submit:hover {
+            background-color: var(--dark);
         }
     </style>
 </head>
 <body>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h2 style="margin: 0;">👨‍🍳 Kitchen Console</h2>
-        <button class="reset-btn" onclick="resetSequence()">Reset Order Num to 1 🔄</button>
+    <header>
+        <h1>☕ Coffee Club</h1>
+        <p>Scan. Order. Enjoy.</p>
+    </header>
+
+    <div class="menu-container">
+        <!-- Menu Items -->
+        <div class="menu-item" data-id="espresso" data-name="Espresso" data-price="120">
+            <div class="item-details">
+                <h3>Espresso</h3>
+                <p>₹120</p>
+            </div>
+            <div class="quantity-controls">
+                <button class="btn-qty decrement">-</button>
+                <span class="qty-display">0</span>
+                <button class="btn-qty increment">+</button>
+            </div>
+        </div>
+
+        <div class="menu-item" data-id="cappuccino" data-name="Cappuccino" data-price="180">
+            <div class="item-details">
+                <h3>Cappuccino</h3>
+                <p>₹180</p>
+            </div>
+            <div class="quantity-controls">
+                <button class="btn-qty decrement">-</button>
+                <span class="qty-display">0</span>
+                <button class="btn-qty increment">+</button>
+            </div>
+        </div>
+
+        <div class="menu-item" data-id="croissant" data-name="Butter Croissant" data-price="150">
+            <div class="item-details">
+                <h3>Butter Croissant</h3>
+                <p>₹150</p>
+            </div>
+            <div class="quantity-controls">
+                <button class="btn-qty decrement">-</button>
+                <span class="qty-display">0</span>
+                <button class="btn-qty increment">+</button>
+            </div>
+        </div>
+
+        <!-- Table Info input -->
+        <div class="table-input-section">
+            <label for="table-num">Your Table Number:</label>
+            <input type="number" id="table-num" placeholder="e.g. 5" min="1">
+        </div>
+
+        <!-- Price summary -->
+        <div class="order-summary">
+            <span>Total Amount:</span>
+            <span id="total-price">₹0</span>
+        </div>
+
+        <button class="btn-submit" id="btn-order">Send Order to Kitchen</button>
     </div>
 
-    <div id="alert-box"></div>
-
-    <div class="card">
-        <h3 style="margin-top:0; color:#2ed573;">Inventory Control</h3>
-        <div id="stock-container">Syncing inventory...</div>
-    </div>
-
-    <div class="card">
-        <h3>Incoming Orders</h3>
-        <div id="orders-container">No orders yet.</div>
-    </div>
-
+    <!-- Firebase Connection Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // IMPORTANT: Replace this placeholder config with your actual Firebase project settings
         const firebaseConfig = {
-            databaseURL: "https://bitesizedbistro-default-rtdb.firebaseio.com/"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let currentMenu = [];
-        let rawOrders = {};
+        // Keep track of counts and calculate live price
+        const menuItems = document.querySelectorAll('.menu-item');
+        const totalPriceDisplay = document.getElementById('total-price');
 
-        // --- Live Sync Menu ---
-        onValue(ref(db, 'menu'), (snapshot) => {
-            currentMenu = snapshot.val() || [];
-            renderKitchenInventory();
-        });
+        menuItems.forEach(item => {
+            const incrementBtn = item.querySelector('.increment');
+            const decrementBtn = item.querySelector('.decrement');
+            const qtyDisplay = item.querySelector('.qty-display');
 
-        // --- Live Sync All Orders ---
-        onValue(ref(db, 'orders'), (snapshot) => {
-            rawOrders = snapshot.val() || {};
-            renderKitchenOrders();
-        });
-
-        function renderKitchenInventory() {
-            const stockContainer = document.getElementById('stock-container');
-            const alertBox = document.getElementById('alert-box');
-            stockContainer.innerHTML = '';
-            alertBox.innerHTML = '';
-
-            currentMenu.forEach(item => {
-                const isLowStock = item.stock < 10;
-                
-                if (isLowStock) {
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'low-stock-alert';
-                    alertDiv.innerHTML = `⚠️ Low Stock Warning: ${item.name} is down to ${item.stock}!`;
-                    alertBox.appendChild(alertDiv);
-                }
-
-                const row = document.createElement('div');
-                row.className = 'stock-row';
-                row.innerHTML = `
-                    <div>
-                        <strong>${item.name}</strong> (Stock: ${item.stock})
-                    </div>
-                    <div class="restock-form">
-                        <input type="number" id="restock-qty-${item.id}" placeholder="+ Amount">
-                        <button class="action-btn" onclick="restockItem(${item.id})">Restock</button>
-                    </div>
-                `;
-                stockContainer.appendChild(row);
+            incrementBtn.addEventListener('click', () => {
+                let qty = parseInt(qtyDisplay.textContent);
+                qtyDisplay.textContent = qty + 1;
+                updateTotal();
             });
+
+            decrementBtn.addEventListener('click', () => {
+                let qty = parseInt(qtyDisplay.textContent);
+                if (qty > 0) {
+                    qtyDisplay.textContent = qty - 1;
+                    updateTotal();
+                }
+            });
+        });
+
+        function updateTotal() {
+            let grandTotal = 0;
+            menuItems.forEach(item => {
+                const qty = parseInt(item.querySelector('.qty-display').textContent);
+                const price = parseFloat(item.getAttribute('data-price'));
+                grandTotal += qty * price;
+            });
+            totalPriceDisplay.textContent = '₹' + grandTotal;
         }
 
-        window.restockItem = function(itemId) {
-            const input = document.getElementById(`restock-qty-${itemId}`);
-            const addValue = parseInt(input.value);
-            if (isNaN(addValue) || addValue <= 0) return alert("Enter valid quantity");
-
-            const itemIndex = currentMenu.findIndex(i => i.id === itemId);
-            if (itemIndex !== -1) {
-                const updatedStock = currentMenu[itemIndex].stock + addValue;
-                set(ref(db, `menu/${itemIndex}/stock`), updatedStock);
-                input.value = '';
-            }
-        };
-
-        function renderKitchenOrders() {
-            const ordersContainer = document.getElementById('orders-container');
-            ordersContainer.innerHTML = '';
-
-            const orderEntries = Object.entries(rawOrders);
-            if (orderEntries.length === 0) {
-                ordersContainer.innerHTML = '<p style="color:#a4b0be; margin:0;">No orders received yet.</p>';
+        // Submitting order to the kitchen page
+        document.getElementById('btn-order').addEventListener('click', () => {
+            const tableNumber = document.getElementById('table-num').value;
+            if (!tableNumber) {
+                alert('Please enter your table number first!');
                 return;
             }
 
-            // Sort orders so newest are at the top
-            orderEntries.sort((a, b) => b[1].timestamp - a[1].timestamp);
+            let orderedItems = [];
+            let total = 0;
 
-            orderEntries.forEach(([key, order]) => {
-                const isServed = order.status === 'Served';
-                const div = document.createElement('div');
-                div.className = `order-card ${isServed ? 'served' : ''}`;
-
-                let itemsHtml = '';
-                order.items.forEach(item => {
-                    itemsHtml += `<li>${item.name} x ${item.qty}</li>`;
-                });
-
-                div.innerHTML = `
-                    <div class="order-header">
-                        <span>Order #${order.orderId} (${order.customer})</span>
-                        <span class="badge ${isServed ? 'served-badge' : ''}">${order.status}</span>
-                    </div>
-                    <ul style="margin: 5px 0; padding-left: 15px;">${itemsHtml}</ul>
-                    ${!isServed ? `<button class="serve-btn" onclick="serveOrder('${key}')">Mark Served ✓</button>` : ''}
-                `;
-                ordersContainer.appendChild(div);
+            menuItems.forEach(item => {
+                const qty = parseInt(item.querySelector('.qty-display').textContent);
+                if (qty > 0) {
+                    const name = item.getAttribute('data-name');
+                    const price = parseFloat(item.getAttribute('data-price'));
+                    orderedItems.push({ item: name, quantity: qty });
+                    total += qty * price;
+                }
             });
-        }
 
-        window.serveOrder = function(orderKey) {
-            update(ref(db, `orders/${orderKey}`), { status: 'Served' });
-        };
-
-        // Resets current count and removes existing order history
-        window.resetSequence = function() {
-            if (confirm("This will clear active orders and reset order numbers to 1. Are you sure?")) {
-                set(ref(db, 'orderSequence'), 0);
-                set(ref(db, 'orders'), null);
+            if (orderedItems.length === 0) {
+                alert('Please select at least one item before sending!');
+                return;
             }
-        };
+
+            const orderData = {
+                table: tableNumber,
+                items: orderedItems,
+                total: total,
+                status: "Pending",
+                timestamp: Date.now()
+            };
+
+            // Push order straight to your kitchen board inside Firebase
+            push(ref(db, 'orders'), orderData)
+                .then(() => {
+                    alert('Order sent! The kitchen will begin preparing your coffee shortly.');
+                    // Reset quantities
+                    document.querySelectorAll('.qty-display').forEach(disp => disp.textContent = '0');
+                    document.getElementById('table-num').value = '';
+                    updateTotal();
+                })
+                .catch((error) => {
+                    console.error("Order failed:", error);
+                    alert("Error sending order. Did you paste your real Firebase keys in yet?");
+                });
+        });
     </script>
 </body>
 </html>
+
