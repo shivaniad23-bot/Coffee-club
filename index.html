@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+                                    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -187,7 +187,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // IMPORTANT: Replace these dummy credentials with your Firebase keys
+        // ⚠️ REPLACE THIS WITH YOUR FIREBASE CONFIGURATION
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -259,7 +259,7 @@
                 return;
             }
 
-            // Safe Order Number counter logic using Firebase Transaction (Starts from 1 and increments safely)
+            // Increments order counting safely from 1
             const counterRef = ref(db, 'lastOrderNum');
             runTransaction(counterRef, (currentValue) => {
                 return (currentValue || 0) + 1;
@@ -288,4 +288,3 @@
     </script>
 </body>
 </html>
-
