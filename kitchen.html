@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+                        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -84,11 +84,11 @@
 
     <header>
         <h1>🍳 Kitchen Order Board</h1>
-        <span style="font-weight: bold;">LIVE</span>
+        <span style="font-weight: bold; color: var(--green);">● LIVE</span>
     </header>
 
     <div class="orders-grid" id="orders-container">
-        <!-- Live Orders Will Appear Here Dynamically -->
+        <!-- Incoming Orders Appear Here Dynamically -->
     </div>
 
     <!-- Firebase Connection Script -->
@@ -96,7 +96,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // IMPORTANT: Use the exact same Firebase config as your customer index.html page
+        // ⚠️ USE THE EXACT SAME FIREBASE CONFIG AS INDEX.HTML
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -112,13 +112,12 @@
 
         const ordersContainer = document.getElementById('orders-container');
 
-        // Listen for new orders and render them
         onValue(ref(db, 'orders'), (snapshot) => {
             ordersContainer.innerHTML = '';
             const data = snapshot.val();
 
             if (!data) {
-                ordersContainer.innerHTML = '<p style="font-size: 1.2rem; color: #666;">No pending orders. Good job!</p>';
+                ordersContainer.innerHTML = '<p style="font-size: 1.2rem; color: #666;">No pending orders.</p>';
                 return;
             }
 
@@ -149,7 +148,6 @@
                 ordersContainer.appendChild(card);
             });
 
-            // Set up button click event to delete completed orders from board
             document.querySelectorAll('.btn-complete').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const orderKey = e.target.getAttribute('data-key');
@@ -160,4 +158,3 @@
     </script>
 </body>
 </html>
-
